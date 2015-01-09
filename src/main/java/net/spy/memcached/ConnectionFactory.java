@@ -40,6 +40,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 
 import net.spy.memcached.auth.AuthDescriptor;
 import net.spy.memcached.ops.Operation;
@@ -66,6 +67,11 @@ public interface ConnectionFactory {
    */
   MemcachedNode createMemcachedNode(SocketAddress sa, SocketChannel c,
       int bufSize);
+  /**
+   * Get the ExecutorService which is used to asynchronously execute listeners
+   * on futures.
+   */
+  ExecutorService getListenerExecutorService();
 
   /**
    * Create a BlockingQueue for operations for a connection.

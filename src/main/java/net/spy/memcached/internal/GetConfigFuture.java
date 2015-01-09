@@ -11,11 +11,7 @@
  */
 package net.spy.memcached.internal;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 import net.spy.memcached.ops.ConfigurationType;
 import net.spy.memcached.ops.Operation;
@@ -32,8 +28,8 @@ public class GetConfigFuture<T> implements Future<T> {
 
   private final OperationFuture<Future<T>> rv;
 
-  public GetConfigFuture(CountDownLatch l, long opTimeout, ConfigurationType type) {
-    this.rv = new OperationFuture<Future<T>>(type.getValue(), l, opTimeout);
+  public GetConfigFuture(CountDownLatch l, long opTimeout, ConfigurationType type, ExecutorService executorService) {
+    this.rv = new OperationFuture<Future<T>>(type.getValue(), l, opTimeout, executorService);
   }
 
   public boolean cancel(boolean ign) {

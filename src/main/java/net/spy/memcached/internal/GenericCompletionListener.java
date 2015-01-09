@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2006-2009 Dustin Sallings
+ * Copyright (C) 2009-2013 Couchbase, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,50 +21,30 @@
  * IN THE SOFTWARE.
  */
 
-package net.spy.memcached.ops;
+package net.spy.memcached.internal;
+
+import java.util.EventListener;
+import java.util.concurrent.Future;
 
 /**
- * Status indicator.
+ * A generic listener that will be notified once the future completes.
+ *
+ * <p>While this listener can be used directly, it is advised to subclass
+ * it to make it easier for the API user to work with. See the
+ * {@link OperationCompletionListener} as an example.</p>
  */
-public class OperationStatus {
+public interface GenericCompletionListener<F extends Future<?>>
+        extends EventListener {
 
-  private final boolean isSuccess;
-  private final String message;
-  private final StatusCode statusCode;
+    /**
+     * This method will be executed once the future completes.
+     *
+     * <p>Completion includes both failure and success, so it is advised to
+     * always check the status and errors of the future.</p>
+     *
+     * @param future the future that got completed.
+     * @throws Exception can potentially throw anything in the callback.
+     */
+    void onComplete(F future) throws Exception;
 
-  public OperationStatus(boolean success, String msg) {
-    this(success, msg, null);
-  }
-
-  public OperationStatus(boolean success, String msg, StatusCode code) {
-    isSuccess = success;
-    message = msg;
-    statusCode = code;
-  }
-
-  /**
-   * Does this status indicate success?
-   */
-  public boolean isSuccess() {
-    return isSuccess;
-  }
-
-  /**
-   * Get the message included as part of this status.
-   */
-  public String getMessage() {
-    return message;
-  }
-
-  /**
-   * Get the status code associated with the operation status.
-   */
-  public StatusCode getStatusCode() {
-    return statusCode;
-  }
-
-  @Override
-  public String toString() {
-    return "{OperationStatus success=" + isSuccess + ":  " + message + "}";
-  }
 }

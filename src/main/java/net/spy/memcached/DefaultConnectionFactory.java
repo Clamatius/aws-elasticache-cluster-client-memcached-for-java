@@ -30,10 +30,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import net.spy.memcached.auth.AuthDescriptor;
 import net.spy.memcached.compat.SpyObject;
@@ -114,6 +111,7 @@ public class DefaultConnectionFactory extends SpyObject implements
   protected final int opQueueLen;
   private final int readBufSize;
   private final HashAlgorithm hashAlg;
+  private ExecutorService executorService;
 
   /**
    * Construct a DefaultConnectionFactory with the given parameters.
@@ -249,6 +247,38 @@ public class DefaultConnectionFactory extends SpyObject implements
     return new ArrayModNodeLocator(nodes, getHashAlg());
   }
 
+  /**
+   * Returns the stored {@link ExecutorService} for listeners.
+   *
+   * By default, a {@link ThreadPoolExecutor} is used that acts exactly
+   * like a default cachedThreadPool, but defines the upper limit of
+   * Threads to be created as the number of available processors to
+   * prevent resource exhaustion.
+   *
+   * @return the stored {@link ExecutorService}.
+   */
+  @Override
+  public ExecutorService getListenerExecutorService() {
+    if (executorService == null) {
+      ThreadFactory threadFactory = new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+          return new Thread(r, "FutureNotifyListener");
+        }
+      };
+
+      executorService = new ThreadPoolExecutor(
+              0,
+              Runtime.getRuntime().availableProcessors(),
+              60L,
+              TimeUnit.SECONDS,
+              new LinkedBlockingQueue<Runnable>(),
+              threadFactory
+      );
+    }
+
+    return executorService;
+  }
   /**
    * Get the op queue length set at construct time.
    */

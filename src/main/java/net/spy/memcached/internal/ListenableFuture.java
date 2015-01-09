@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2006-2009 Dustin Sallings
+ * Copyright (C) 2009-2013 Couchbase, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,50 +21,32 @@
  * IN THE SOFTWARE.
  */
 
-package net.spy.memcached.ops;
+package net.spy.memcached.internal;
+
+import java.util.concurrent.Future;
 
 /**
- * Status indicator.
+ * A {@link Future} that accepts one or more listeners that will be executed
+ * asynchronously.
  */
-public class OperationStatus {
+public interface ListenableFuture<T, L extends GenericCompletionListener>
+        extends Future<T> {
 
-  private final boolean isSuccess;
-  private final String message;
-  private final StatusCode statusCode;
+    /**
+     * Add a listener to the future, which will be executed once the operation
+     * completes.
+     *
+     * @param listener the listener which will be executed.
+     * @return the current future to allow for object-chaining.
+     */
+    Future<T> addListener(L listener);
 
-  public OperationStatus(boolean success, String msg) {
-    this(success, msg, null);
-  }
+    /**
+     * Remove a previously added listener from the future.
+     *
+     * @param listener the previously added listener.
+     * @return the current future to allow for object-chaining.
+     */
+    Future<T> removeListener(L listener);
 
-  public OperationStatus(boolean success, String msg, StatusCode code) {
-    isSuccess = success;
-    message = msg;
-    statusCode = code;
-  }
-
-  /**
-   * Does this status indicate success?
-   */
-  public boolean isSuccess() {
-    return isSuccess;
-  }
-
-  /**
-   * Get the message included as part of this status.
-   */
-  public String getMessage() {
-    return message;
-  }
-
-  /**
-   * Get the status code associated with the operation status.
-   */
-  public StatusCode getStatusCode() {
-    return statusCode;
-  }
-
-  @Override
-  public String toString() {
-    return "{OperationStatus success=" + isSuccess + ":  " + message + "}";
-  }
 }
